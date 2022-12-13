@@ -24,37 +24,39 @@ typedef struct figureObjects
 } figure;
 
 // -----------------------------------------------------------------------------
-
-void init(void);
-void convColors(void);
-void loadImages(void);
+void playScreen();
+void aboutScreen();
+void init();
+void convColors();
+void loadImages();
 figure loadArray(FILE *, int, int);
 
+void homeKey(unsigned char);
 void keyPress(unsigned char, int, int);
-void reset(void);
+void reset();
 
 void loop(int);
 
-void checkCollision(void);
-void eventCollision(void);
+void checkCollision();
+void eventCollision();
 
-void updateDino(void);
-void updateCacti(void);
+void updateDino();
+void updateCacti();
 
-void placeCacti(void);
+void placeCacti();
 
-void disp(void);
+void disp();
 
 /* -- Drawing Functions -- */
 
-void drawScene(void);
+void drawScene();
 void drawFigure(int, int, int, int, int, int);
 
 // Drawing Utilities
 
 void drawLine(int, int, int, int);
 void drawRect(int, int, int, int);
-void drawText(void);
+void drawText();
 char *intToStr(int);
 
 // -----------------------------------------------------------------------------
@@ -68,7 +70,7 @@ GLfloat cols[7][3] = {
     {85, 85, 85},    // Grey Dark
     {25, 50, 128},   // Blue
     {25, 75, 25},    // Green
-    {76, 38, 10},    // Brown
+    {76, 58, 10},    // Brown
     {255, 255, 255}  // White
 };
 
@@ -92,7 +94,7 @@ int dinoPeriod = 20;
 /* -- Control Variables for Cactus -- */
 // Figure
 int cactusOffset = WH / 4;
-int cactiPos[5] = {WW * 2, WW * 2, WW * 2, WW * 2, WW * 2}, cactiLastPushed = -999;
+int cactiPos[5] = {WW * 2, WW * 2, WW * 2, WW * 2, WW * 2}, cactiLastPushed = -1;
 int winLeftEdge, winRightEdge;
 
 // Motion
@@ -109,27 +111,54 @@ int cloudPos = WW / 3, cloudLastPushed = -999;
 int cloudPeriod = 20, cloudShift = 2;
 
 // -----------------------------------------------------------------------------
+static void RenderSceneCB()
+{
+    GLclampf Red = 0.5f, Green = 0.0f, Blue = 0.0f, Alpha = 0.0f;
+    // glClearColor(Red, Green, Blue, Alpha);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glutSwapBuffers();
+    // glColor3fv(cols[1]);
+    glRasterPos2f(11 * WW / 28, WH / 10);
+    unsigned char pause[] = "Press P for Play/Pause";
+    glutBitmapString(GLUT_BITMAP_HELVETICA_18, pause);
+}
 
 int main(int argc, char *argv[])
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(WW, WH);
-    glutInitWindowPosition(940, 0);
-    glutCreateWindow("DOWNASAUR GAME");
+    glutInitWindowPosition(330, 0);
+    glutCreateWindow("Rex, Run!");
+
+    // glutDisplayFunc(RenderSceneCB);
+    // glutKeyboardFunc(homeKey);
+    // glColor3fv(cols[1]);
+    // glRasterPos2f(11 * WW / 28, WH / 10);
+    // unsigned char pause[] = "Press P for Play/Pause";
+    // glutBitmapString(GLUT_BITMAP_HELVETICA_18, pause);
+
+    // playScreen();
     init();
+    glutDisplayFunc(aboutScreen);
+    // glutKeyboardFunc(homeKey);
     glutKeyboardFunc(keyPress);
-    glutDisplayFunc(disp);
-    glutTimerFunc(refreshPeriod, loop, 0);
+
     glutMainLoop();
 
     return 0;
 }
-
-void init(void)
+void playScreen()
+{
+    init();
+    glutKeyboardFunc(keyPress);
+    glutDisplayFunc(disp);
+    glutTimerFunc(refreshPeriod, loop, 0);
+    // glutMainLoop();
+}
+void init()
 {
     gluOrtho2D(0.0, WW, 0.0, WH);
-
     dinoLeftEdge = 0 - (CW / 2) + dinoX;
     dinoRightEdge = DW + (CW / 2) + dinoX;
     winLeftEdge = 0 - (CW / 2);
@@ -235,6 +264,18 @@ figure loadArray(FILE *fp, int w, int h)
 }
 
 /* -- Event Trigger Functions -- */
+void homeKey(unsigned char key)
+{
+    switch (key)
+    {
+    case 49: // Key 1
+        playScreen();
+        break;
+    case 50: // Key 2
+        glutDisplayFunc(aboutScreen);
+        break;
+    }
+}
 
 void keyPress(unsigned char key, int x, int y)
 {
@@ -245,9 +286,17 @@ void keyPress(unsigned char key, int x, int y)
         break;
     case 32: // Key Space
         if (halt == true)
+        {
             reset();
+        }
         else
             dinoJumpEnable = true;
+        break;
+    case 49: // Key 1
+        playScreen();
+        break;
+    case 50: // Key 2
+        glutDisplayFunc(aboutScreen);
         break;
     case 112: // Key 'p'
         halt = !halt;
@@ -257,6 +306,10 @@ void keyPress(unsigned char key, int x, int y)
 
 void reset(void)
 {
+    // glColor3fv(cols[4]);
+    // glRasterPos2f(23 * WW / 56, WH / 2);
+    // unsigned char success[] = "OUT";
+    // glutBitmapString(GLUT_BITMAP_HELVETICA_18, success);
     runtime = 0;
     halt = false;
     started = true;
@@ -264,7 +317,7 @@ void reset(void)
     dinoState = 0;
     dinoHS = 0;
     cactiPos[0] = cactiPos[1] = cactiPos[2] = cactiPos[3] = cactiPos[4] = WW * 2;
-    cactiLastPushed = -999;
+    cactiLastPushed = -1;
 }
 
 void loop(int val)
@@ -392,8 +445,7 @@ void drawScene(void)
     }
     drawFigure(7, cloudPos - (LW / 2), cloudOffset + cloudOffsetDelta, 0, LW, LH);
 
-    /* -- Ground -- */
-    glColor3fv(cols[5]);
+    glColor3fv(cols[5]); // Ground
     drawRect(0, 0, WW, WH / 4);
 }
 
@@ -521,4 +573,13 @@ char *intToStr(int n)
     tem[k] = '\0';
 
     return tem;
+}
+
+void aboutScreen()
+{
+    // glClear(GL_COLOR_BUFFER_BIT);
+    glColor3fv(cols[1]);
+    glRasterPos2f(11 * WW / 28, WH / 10);
+    unsigned char pause[] = "Press P for Play/Pause";
+    glutBitmapString(GLUT_BITMAP_HELVETICA_18, pause);
 }

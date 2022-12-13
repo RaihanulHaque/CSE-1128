@@ -1,6 +1,3 @@
-# BTech 4th Semester Graphics Project
-
-This is my BTech 4th Semester Graphics Project inspired by the _Downasaur game_ on Google Chrome,
 written in **C** on **OpenGL API** using `freeglut` library.
 
 ## Commands
