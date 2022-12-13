@@ -1,24 +1,17 @@
-/*
-    Anindya Kundu
-    ID: 510817020
-    IT Sem 4
-*/
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <time.h>
+#include <GL/freeglut.h>
 
-#include <GL/freeglut.h> // basic GLUT library
-#include <stdlib.h>      // for dynamic memory allocation
-#include <stdbool.h>     // for boolean variables
-#include <time.h>        // for seed in random generation
-#include <string.h>      // for text operation
-
-#include <stdio.h> // generic terminal printing (for debugging)
-
-#define WW 800 // Window	Width
-#define WH 600 // Window	Height
-#define DW 150 // Dinosaur	Width
-#define DH 100 // Dinosaur	Height
-#define CW 60  // Cactus	Width
-#define CH 80  // Cactus	Height
-#define LW 252 // Cloud	Width
+#define WW 800 // Window Width
+#define WH 600 // Window Height
+#define DW 150 // Dinosaur Width
+#define DH 100 // Dinosaur Height
+#define CW 60  // Cactus Width
+#define CH 80  // Cactus Height
+#define LW 252 // Cloud Width
 #define LH 140 // Cloud	Height
 
 // -----------------------------------------------------------------------------
@@ -32,23 +25,15 @@ typedef struct figureObjects
 
 // -----------------------------------------------------------------------------
 
-// Function Declarations
-
-/* -- Initialization Functions -- */
-
 void init(void);
 void convColors(void);
 void loadImages(void);
 figure loadArray(FILE *, int, int);
 
-/* -- Event Trigger Functions -- */
-
 void keyPress(unsigned char, int, int);
 void reset(void);
 
-/* -- Action Functions -- */
-
-void loop(int); // Callback Loop (timed)
+void loop(int);
 
 void checkCollision(void);
 void eventCollision(void);
@@ -58,7 +43,7 @@ void updateCacti(void);
 
 void placeCacti(void);
 
-void disp(void); // Display Function
+void disp(void);
 
 /* -- Drawing Functions -- */
 
@@ -74,14 +59,8 @@ char *intToStr(int);
 
 // -----------------------------------------------------------------------------
 
-// Global Variables
-
-/* -- Environment Variables -- */
-
 int refreshPeriod = 5, runtime = 0, score = 0, hiscore;
 bool halt = true, started = false;
-
-/* -- Colour Definitions (RGB) -- */
 
 GLfloat cols[7][3] = {
     {0, 0, 0},       // Black
@@ -94,14 +73,11 @@ GLfloat cols[7][3] = {
 };
 
 /* -- Image Objects -- */
-
 figure dino1, dino2, dino3, dino4, dino5, dino6; // Dinosaur
 figure cacti, cloud;                             // Scenery
 
 /* -- Control Variables for Dinosaur -- */
-
 // Figure
-
 int dinoState = 0, dinoX = 100, dinoY = WH / 4, dinoHS = 0;
 int dinoHeights[20] = {
     0, 6, 12, 17, 21, 25, 28, 30, 32, 33,
@@ -114,9 +90,7 @@ bool dinoJumpEnable = false;
 int dinoPeriod = 20;
 
 /* -- Control Variables for Cactus -- */
-
 // Figure
-
 int cactusOffset = WH / 4;
 int cactiPos[5] = {WW * 2, WW * 2, WW * 2, WW * 2, WW * 2}, cactiLastPushed = -999;
 int winLeftEdge, winRightEdge;
@@ -127,21 +101,14 @@ int cactiPeriod = 5, cactiShift = 5;
 int gapPeriodOrig = 800, gapDelta = 0, gapPeriod = 800;
 
 /* -- Control Variables for Cloud -- */
-
 // Figure
-
 int cloudOffset = 13 * WH / 20, cloudOffsetDelta = 0;
 int cloudPos = WW / 3, cloudLastPushed = -999;
 
 // Motion
-
 int cloudPeriod = 20, cloudShift = 2;
 
 // -----------------------------------------------------------------------------
-
-// Function Definitions
-
-/* -- Main Function -- */
 
 int main(int argc, char *argv[])
 {
@@ -159,8 +126,6 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-/* -- Initialization Functions  -- */
-
 void init(void)
 {
     gluOrtho2D(0.0, WW, 0.0, WH);
@@ -174,7 +139,7 @@ void init(void)
     convColors();
     loadImages();
 
-    FILE *fp = fopen("res/hiscore", "r");
+    FILE *fp = fopen("res/hiscore.txt", "r");
     fscanf(fp, "%d", &hiscore);
 }
 
@@ -302,10 +267,6 @@ void reset(void)
     cactiLastPushed = -999;
 }
 
-/* -- Action Functions -- */
-
-// Callback Loop (timed)
-
 void loop(int val)
 {
     runtime += refreshPeriod;
@@ -357,7 +318,7 @@ void eventCollision(void)
     halt = true;
     if (score <= hiscore)
         return;
-    FILE *fp = fopen("res/hiscore", "w");
+    FILE *fp = fopen("res/hiscore.txt", "w");
     fprintf(fp, "%d", score);
     fclose(fp);
 }
@@ -399,32 +360,25 @@ void disp(void)
     drawScene();
 
     // Draw Dinosaur
-
     drawFigure(dinoState, dinoX, dinoY, dinoHeights[dinoHS] * 4, DW, DH);
 
     // Draw Cacti
-
     placeCacti();
 
     // Draw Vvisible Text Content
-
     drawText();
 
     glutSwapBuffers();
 }
 
-/* -- Drawing Functions -- */
-
 void drawScene(void)
 {
 
     /* -- Background -- */
-
     glColor3fv(cols[1]);
     drawRect(0, 0, WW, WH);
 
     /* -- Clouds -- */
-
     if (runtime % cloudPeriod == 0)
     {
         if (cloudPos >= -(LW / 2) && cloudPos <= WW + (LW / 2))
@@ -439,7 +393,6 @@ void drawScene(void)
     drawFigure(7, cloudPos - (LW / 2), cloudOffset + cloudOffsetDelta, 0, LW, LH);
 
     /* -- Ground -- */
-
     glColor3fv(cols[5]);
     drawRect(0, 0, WW, WH / 4);
 }
@@ -503,7 +456,6 @@ void placeCacti(void)
 }
 
 /* -- Drawing Utilities -- */
-
 void drawLine(int xa, int ya, int xb, int yb)
 {
     glBegin(GL_LINES);
